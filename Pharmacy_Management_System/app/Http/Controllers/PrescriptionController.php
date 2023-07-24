@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Prescription;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
 
 class PrescriptionController extends Controller
 {
@@ -20,8 +21,9 @@ class PrescriptionController extends Controller
         //dd($request);
         $request->validate([
             'note' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:255',
             'images' => 'required|array|max:5',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Validate each image file
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $images = [];
@@ -31,7 +33,7 @@ class PrescriptionController extends Controller
                 $timestamp = time(); // Get the current timestamp
                 $extension = $image->getClientOriginalExtension(); // Get the original file extension
                 $filename = $timestamp . '_' . $randomString .'_image_' . ($index + 1) . '.' . $extension;
-                $image->storeAs('public/images/prescription_images', $filename); // Store the image in the storage/app/prescription_images directory
+                $image->storeAs('public/images/prescription_images', $filename); // Store the image in the storage/app/public/images/prescription_images directory
                 $images[] = $filename;
             }
         }
@@ -57,24 +59,40 @@ class PrescriptionController extends Controller
             'states' => 'Not Yet Send Quotations',
         ]);
 
-        Session::flash('success', 'Answer saved successfully');
+        Session::flash('success', 'Prescription Send successfully');
         return redirect()->back();
-        // Redirect or return a response indicating success
+
+        if($prescription){
+            return response()->json([
+                'status' => 200,
+                'message' => 'Quotation Send successfully',
+            ]);
+        }
+        else{
+            return response()->json([
+                'status'=> 404,
+                'message' => 'Quotation Send unsuccessfully',
+                ]);
+        }
     }
 
 
     public function GetPrescription($prescription_id){
 
+
         $prescription = Prescription::find($prescription_id);
         if($prescription){
+            $user_type = Auth::user()->user_type;
             return response()->json([
-            'status'=> 200,
-            'prescription'=> $prescription
+                'status' => 200,
+                'prescription' => $prescription,
+                'user_type' => $user_type,
             ]);
         }
         else{
             return response()->json([
-                'status'=> 404
+                'status'=> 404,
+                'message' => 'GetPrescription unsuccessfully',
                 ]);
         }
      }

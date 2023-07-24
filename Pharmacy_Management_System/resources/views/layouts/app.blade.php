@@ -55,6 +55,9 @@
                         @guest
                             @if (Route::has('login'))
                                 <li class="nav-item">
+                                    <a class="btn btn-warning" style="margin-right:100px;" href="{{ route('login') }}">{{ __('Post Your Prescription') }}</a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
                                 </li>
                             @endif
@@ -66,7 +69,11 @@
                             @endif
                         @else
                             <li class="nav-item">
-                                <a class="btn btn-warning PostPrescription ">{{ __('Post Your Prescription') }}</a>
+                                @if (Auth::check() && Auth::user()->id && Auth::user()->user_type != 'Admin')
+                                    <a class="btn btn-warning PostPrescription " style="margin-right:100px;">{{ __('Post Your Prescription') }}</a>
+                                @else
+                                    <input type="hidden" name="user_id" value="default_value">
+                                @endif
                             </li>
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>

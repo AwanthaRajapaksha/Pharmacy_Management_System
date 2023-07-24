@@ -8,10 +8,14 @@
                 <div class="modal-body">
                     <form action="{{ route('prescriptions.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
+                        @if (Auth::check() && Auth::user()->id)
+                            <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
+                        @else
+                            <input type="hidden" name="user_id" value="default_value">
+                        @endif
                         <div class="mb-3">
                             <label for="recipient-name" class="col-form-label">Prescription Images (Max 5):</label>
-                            <input type="file" name="images[]" class="form-control" accept="image/*" multiple>
+                            <input type="file" name="images[]" class="form-control" accept="image/*" multiple id="imageInput" required>
                         </div>
                         <div class="mb-3">
                             <label for="recipient-name" class="col-form-label">Delivery Address:</label>
@@ -19,7 +23,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="message-text" class="col-form-label">Delivery Date:</label>
-                            <input type="date" name="delivery_date" class="form-control">
+                            <input type="date" name="delivery_date" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label for="message-text" class="col-form-label">Delivery Time:</label>
@@ -55,5 +59,20 @@
     <script>
         $(document).on('click','.PostPrescription',function(e){
             $('#PostModal').modal('show');
+        });
+    </script>
+
+    <script>
+        // Add an event listener to the file input element
+        document.getElementById('imageInput').addEventListener('change', function() {
+            var files = this.files;
+            var maxFiles = 5;
+
+            // Check the number of selected files
+            if (files.length > maxFiles) {
+                alert('You can only select up to ' + maxFiles + ' images.');
+                // Clear the selected files to prevent submitting more than 5 images
+                this.value = null;
+            }
         });
     </script>
